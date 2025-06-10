@@ -11,14 +11,12 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::create('fertilizers', function (Blueprint $table) {
+        Schema::create('quotas', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->text('description');
-            $table->integer('price');
-            $table->integer('stock');
-            $table->integer('minimum_stock');
-            $table->boolean('status')->default(true);
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('fertilizer_id')->constrained()->onDelete('cascade');
+            $table->integer('allocated_amount');
+            $table->integer('used_amount')->default(0);
             $table->timestamps();
         });
     }
@@ -28,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('fertilizers');
+        Schema::dropIfExists('quotas');
     }
 };
