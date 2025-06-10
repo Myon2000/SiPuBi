@@ -15,11 +15,12 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->text('description');
-            $table->integer('price');
-            $table->integer('stock');
-            $table->integer('minimum_stock');
+            $table->decimal('price', 10, 2);
+            $table->integer('current_stock')->default(0);
+            $table->integer('minimum_stock')->default(0);
             $table->boolean('status')->default(true);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

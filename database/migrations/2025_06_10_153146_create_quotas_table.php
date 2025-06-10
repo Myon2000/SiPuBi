@@ -15,9 +15,11 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('fertilizer_id')->constrained()->onDelete('cascade');
-            $table->integer('allocated_amount');
-            $table->integer('used_amount')->default(0);
+            $table->float('allocated_amount')->default(0); // Tambahkan default 0
+            $table->float('used_amount')->default(0);
+            $table->text('notes')->nullable();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

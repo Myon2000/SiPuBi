@@ -24,7 +24,8 @@ class User extends Authenticatable
         'role',
         'address',
         'phone',
-        'status'
+        'status',
+        'land_area', 
     ];
 
     /**
@@ -45,11 +46,17 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'status' => 'boolean',
     ];
 
-    public function transactions()
+    protected $attributes = [
+        'role' => 'petani',
+        'status' => true
+    ];
+
+    public function purchaseRequests()
     {
-        return $this->hasMany(Transaction::class);
+        return $this->hasMany(PurchaseRequest::class, 'farmer_id');
     }
 
     public function quotas()

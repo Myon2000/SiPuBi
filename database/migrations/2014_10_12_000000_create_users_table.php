@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('role')->default('petani');
             $table->string('address')->nullable();
             $table->string('phone')->nullable();
+            $table->decimal('land_area', 8, 2)->nullable();
             $table->boolean('status')->default(true);
             $table->timestamp('email_verified_at')->nullable();
             $table->rememberToken();
