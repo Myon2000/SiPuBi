@@ -27,12 +27,19 @@
                             </svg>
                             <span>Kuota Pupuk</span>
                         </a>
-                        <a href="#{{-- {{ route('purchase-requests.index') }}--}}"  
-                           class="group inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('purchase-requests.*') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
-                            <svg class="w-5 h-5 mr-2 {{ request()->routeIs('purchase-requests.*') ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('petani.purchase-requests.index') }}"  
+                        class="group inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('petani.purchase-requests.*') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                            <svg class="w-5 h-5 mr-2 {{ request()->routeIs('petani.purchase-requests.*') ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                             </svg>
                             <span>Permintaan</span>
+                        </a>
+                        <a href="{{ route('petani.fertilizers.index') }}" 
+                        class="group inline-flex items-center px-1 pt-1 border-b-2 {{ request()->routeIs('petani.fertilizers.index') ? 'border-blue-500 text-gray-900' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                            <svg class="w-5 h-5 mr-2 {{ request()->routeIs('petani.fertilizers.index') ? 'text-blue-500' : 'text-gray-400 group-hover:text-gray-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                            </svg>
+                            <span>Stok Pupuk</span>
                         </a>
                     @endif
                 </div>
@@ -170,12 +177,19 @@
                     Kuota Pupuk
                 </a>
 
-                <a href="#{{--{{ route('purchase-requests.index') }}--}}" 
-                   class="flex items-center pl-3 pr-4 py-2 border-l-4 {{ request()->routeIs('purchase-requests.*') ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
-                    <svg class="mr-3 h-6 w-6 {{ request()->routeIs('purchase-requests.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <a href="{{ route('petani.purchase-requests.index') }}" 
+                class="flex items-center pl-3 pr-4 py-2 border-l-4 {{ request()->routeIs('petani.purchase-requests.*') ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                    <svg class="mr-3 h-6 w-6 {{ request()->routeIs('petani.purchase-requests.*') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
                     </svg>
                     Permintaan
+                </a>
+                <a href="{{ route('petani.fertilizers.index') }}" 
+                class="flex items-center pl-3 pr-4 py-2 border-l-4 {{ request()->routeIs('petani.fertilizers.index') ? 'border-blue-500 text-blue-700 bg-blue-50' : 'border-transparent text-gray-600 hover:bg-gray-50 hover:border-gray-300' }}">
+                    <svg class="mr-3 h-6 w-6 {{ request()->routeIs('petani.fertilizers.index') ? 'text-blue-500' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                    </svg>
+                    Stok Pupuk
                 </a>
             @endif
         </div>

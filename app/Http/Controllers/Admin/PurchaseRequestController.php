@@ -4,20 +4,60 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\PurchaseRequest;
+use App\Models\Quota;
+use App\Models\StockTransaction;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PurchaseRequestController extends Controller
 {
-    public function index()
+    /**
+     * Display a listing of the purchase requests.
+     */
+    public function index(Request $request)
     {
+        $status = $request->query('status', 'pending');
+        
         $requests = PurchaseRequest::with(['farmer', 'fertilizer'])
+            ->when($status !== 'all', function ($query) use ($status) {
+                return $query->where('status', $status);
+            })
             ->latest()
-            ->get();
-        return view('admin.purchase-requests.index', compact('requests'));
+            ->paginate(10)
+            ->appends(['status' => $status]);
+            
+        return view('admin.purchase_requests.index', compact('requests', 'status'));
     }
 
+    /**
+     * Display the specified purchase request.
+     */
+    public function show(PurchaseRequest $purchaseRequest)
+    {
+        $purchaseRequest->load([
+            'fertilizer',
+            'farmer' => function($query) {
+                $query->withDefault([
+                    'name' => 'Petani tidak ditemukan',
+                    'email' => '-'
+                ]);
+            },
+            'processor' => function($query) {
+                $query->withDefault([
+                    'name' => 'Admin tidak ditemukan',
+                    'email' => '-'
+                ]);
+            }
+        ]);
+        
+        return view('admin.purchase_requests.show', compact('purchaseRequest'));
+    }
+
+    /**
+     * Update purchase request status
+     */
     public function update(Request $request, PurchaseRequest $purchaseRequest)
     {
         // Cek apakah request masih pending
@@ -55,6 +95,15 @@ class PurchaseRequestController extends Controller
                 // Update kuota
                 $quota->increment('used_amount', $purchaseRequest->quantity);
 
+                // Catat transaksi stok
+                StockTransaction::create([
+                    'fertilizer_id' => $purchaseRequest->fertilizer_id,
+                    'quantity' => $purchaseRequest->quantity,
+                    'transaction_type' => 'out',
+                    'notes' => "Pembelian pupuk oleh " . $purchaseRequest->farmer->name,
+                    'admin_id' => Auth::id(),
+                ]);
+
                 // Log transaksi
                 Log::info("Approved purchase request #{$purchaseRequest->id} for {$purchaseRequest->quantity} items");
             }
@@ -63,7 +112,7 @@ class PurchaseRequestController extends Controller
             $purchaseRequest->update([
                 'status' => $validated['status'],
                 'notes' => $validated['notes'],
-                'processed_by' => auth()->id(),
+                'processed_by' => Auth::id(),
                 'processed_date' => now()
             ]);
 
@@ -73,7 +122,86 @@ class PurchaseRequestController extends Controller
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error("Error processing purchase request: " . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat memproses permintaan');
+            return back()->with('error', 'Terjadi kesalahan saat memproses permintaan: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Approve a purchase request (shortcut)
+     */
+    public function approve(PurchaseRequest $purchaseRequest)
+    {
+        // Bungkus dalam transaksi database untuk memastikan konsistensi data
+        DB::beginTransaction();
+        
+        try {
+            // Update status permintaan
+            $purchaseRequest->update([
+                'status' => 'approved',
+                'processed_by' => auth()->id(),
+                'processed_date' => now()
+            ]);
+            
+            // Kurangi stok pupuk
+            $fertilizer = $purchaseRequest->fertilizer;
+            $fertilizer->current_stock -= $purchaseRequest->quantity;
+            $fertilizer->save();
+            
+            // Catat transaksi stok dengan SEMUA kolom wajib diisi
+            StockTransaction::create([
+                'fertilizer_id' => $purchaseRequest->fertilizer_id,
+                'quantity' => -$purchaseRequest->quantity,
+                'type' => 'out', // Pastikan type juga diisi
+                'description' => "Permintaan #" . $purchaseRequest->id . " disetujui untuk " . ($purchaseRequest->farmer->name ?? 'petani'),
+                'performed_by' => auth()->id()
+            ]);
+            
+            // Update kuota petani
+            $quota = $purchaseRequest->farmer->quotas()
+                ->where('fertilizer_id', $purchaseRequest->fertilizer_id)
+                ->first();
+                
+            if ($quota) {
+                $quota->used_amount += $purchaseRequest->quantity;
+                $quota->save();
+            }
+            
+            DB::commit();
+            
+            return redirect()->route('admin.purchase-requests.index')
+                ->with('success', 'Permintaan berhasil disetujui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal menyetujui permintaan: ' . $e->getMessage());
+        }
+    }
+
+    public function reject(Request $request, PurchaseRequest $purchaseRequest)
+    {
+        $validated = $request->validate([
+            'rejection_reason' => 'required|string|max:255',
+        ]);
+        
+        DB::beginTransaction();
+        
+        try {
+            // Update status permintaan
+            $purchaseRequest->update([
+                'status' => 'rejected',
+                'notes' => $validated['rejection_reason'],
+                'processed_by' => auth()->id(),
+                'processed_date' => now()
+            ]);
+            
+            DB::commit();
+            
+            return redirect()->route('admin.purchase-requests.index')
+                ->with('success', 'Permintaan berhasil ditolak.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()
+                ->with('error', 'Gagal menolak permintaan: ' . $e->getMessage());
         }
     }
 }

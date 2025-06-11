@@ -1,86 +1,158 @@
 @extends('layouts.app')
 
-@section('title', 'Kuota Pupuk')
+@section('title', 'Dashboard Petani')
 
 @section('content')
-<div class="bg-white shadow-md rounded-lg overflow-hidden">
-    <div class="px-6 py-4 border-b border-gray-200">
-        <h3 class="text-lg font-semibold">Kuota Pupuk Saya</h3>
-    </div>
-    <div class="p-6">
-        @if(!auth()->user()->land_area)
-            <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-yellow-700">
-                            Anda belum mengatur luas lahan. <a href="{{ route('profile.edit') }}" class="font-medium underline text-yellow-700 hover:text-yellow-600">Atur sekarang</a> untuk menghitung kuota.
-                        </p>
-                    </div>
+<div class="space-y-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Kuota Section -->
+        <div class="md:col-span-1">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <h5 class="text-lg font-semibold">Kuota Pupuk</h5>
                 </div>
-            </div>
-        @else
-            <div class="mb-4 bg-blue-50 border-l-4 border-blue-400 p-4">
-                <div class="flex">
-                    <div class="flex-shrink-0">
-                        <svg class="h-5 w-5 text-blue-400" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2h-1V9a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                        </svg>
-                    </div>
-                    <div class="ml-3">
-                        <p class="text-sm text-blue-700">
-                            Kuota dihitung berdasarkan luas lahan Anda: <strong>{{ auth()->user()->land_area }} hektar</strong>
-                        </p>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                @foreach($quotas as $quota)
-                <div class="bg-white border rounded-lg overflow-hidden shadow-sm">
-                    <div class="px-4 py-5 sm:px-6 border-b">
-                        <h3 class="text-lg font-medium text-gray-900">{{ $quota->fertilizer->name }}</h3>
-                    </div>
-                    <div class="px-4 py-5 sm:p-6">
-                        @php
-                            $percentage = $quota->allocated_amount > 0 
-                                ? ($quota->remaining_quota / $quota->allocated_amount) * 100 
-                                : 0;
-                        @endphp
-                        <div class="flex justify-between items-start mb-1">
-                            <span class="text-sm text-gray-500">Sisa Kuota</span>
-                            <span class="text-sm font-medium {{ $percentage <= 20 ? 'text-red-600' : 'text-green-600' }}">
+                <div class="p-6 space-y-4">
+                    @forelse(auth()->user()->quotas as $quota)
+                    <div class="border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h6 class="font-medium">{{ $quota->fertilizer->name }}</h6>
+                            @php
+                                $percentage = $quota->allocated_amount > 0 
+                                    ? (($quota->allocated_amount - $quota->used_amount) / $quota->allocated_amount) * 100 
+                                    : 0;
+                            @endphp
+                            <span class="px-2 py-1 text-xs rounded-full {{ $percentage <= 20 ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800' }}">
                                 {{ number_format($percentage, 0) }}%
                             </span>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
-                            <div class="h-2.5 rounded-full {{ $percentage <= 20 ? 'bg-red-600' : 'bg-green-600' }}" 
-                                 style="width: {{ $percentage }}%">
+                        <div class="space-y-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: {{ $percentage }}%"></div>
                             </div>
-                        </div>
-                        <div class="mt-4 space-y-2">
-                            <div class="flex justify-between text-sm text-gray-600">
-                                <span>Total Kuota</span>
-                                <span>{{ number_format($quota->allocated_amount, 0) }} kg</span>
-                            </div>
-                            <div class="flex justify-between text-sm text-gray-600">
-                                <span>Terpakai</span>
-                                <span>{{ number_format($quota->used_amount, 0) }} kg</span>
-                            </div>
-                            <div class="flex justify-between text-sm font-medium">
-                                <span>Sisa</span>
-                                <span>{{ number_format($quota->remaining_quota, 0) }} kg</span>
+                            <div class="flex justify-between text-xs text-gray-600">
+                                <span>Terpakai: {{ number_format($quota->used_amount, 0) }} kg</span>
+                                <span>Total: {{ number_format($quota->allocated_amount, 0) }} kg</span>
                             </div>
                         </div>
                     </div>
+                    @empty
+                    <div class="text-center py-4 text-gray-500">
+                        <p>Belum ada kuota pupuk</p>
+                    </div>
+                    @endforelse
                 </div>
-                @endforeach
             </div>
-        @endif
+        </div>
+        
+        <!-- Stok Pupuk Section -->
+        <div class="md:col-span-1">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold">Stok Pupuk di Gudang</h5>
+                </div>
+                <div class="p-6 space-y-4">
+                    @forelse($fertilizers as $fertilizer)
+                    <div class="border rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <h6 class="font-medium">{{ $fertilizer->name }}</h6>
+                            @php
+                                $stockStatus = $fertilizer->current_stock > $fertilizer->minimum_stock ? 'Tersedia' : 'Menipis';
+                                $statusColor = $fertilizer->current_stock > $fertilizer->minimum_stock ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800';
+                            @endphp
+                            <span class="px-2 py-1 text-xs rounded-full {{ $statusColor }}">
+                                {{ $stockStatus }}
+                            </span>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2">
+                                @php
+                                    // Anggap maksimum stok adalah 2x minimum untuk visualisasi
+                                    $maxStock = max($fertilizer->minimum_stock * 2, $fertilizer->current_stock);
+                                    $stockPercentage = ($fertilizer->current_stock / $maxStock) * 100;
+                                @endphp
+                                <div class="{{ $fertilizer->current_stock > $fertilizer->minimum_stock ? 'bg-green-600' : 'bg-yellow-600' }} h-2 rounded-full" 
+                                     style="width: {{ $stockPercentage }}%">
+                                </div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-600">
+                                <span>Minimum: {{ number_format($fertilizer->minimum_stock, 0) }} kg</span>
+                                <span>Stok: {{ number_format($fertilizer->current_stock, 0) }} kg</span>
+                            </div>
+                        </div>
+                    </div>
+                    @empty
+                    <div class="text-center py-4 text-gray-500">
+                        <p>Tidak ada data stok pupuk</p>
+                    </div>
+                    @endforelse
+                </div>
+            </div>
+        </div>
+        
+        <!-- Aktivitas Terbaru Section -->
+        <div class="md:col-span-1">
+            <div class="bg-white shadow-md rounded-lg overflow-hidden">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h5 class="text-lg font-semibold">Aktivitas Terbaru</h5>
+                </div>
+                <div class="p-6">
+                    <div class="flow-root">
+                        <ul role="list" class="-mb-8">
+                            {{-- @foreach($recentRequests as $request)
+                            <li>
+                                <div class="relative pb-8">
+                                    @unless($loop->last)
+                                        <span class="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gray-200" aria-hidden="true"></span>
+                                    @endunless
+                                    <div class="relative flex space-x-3">
+                                        <div>
+                                            <span class="h-8 w-8 rounded-full flex items-center justify-center ring-8 ring-white 
+                                                {{ $request->status === 'approved' ? 'bg-green-500' : 
+                                                   ($request->status === 'pending' ? 'bg-yellow-500' : 'bg-red-500') }}">
+                                                <!-- Icon -->
+                                                <svg class="h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                                    @if($request->status === 'approved')
+                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                    @elseif($request->status === 'pending')
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                    @else
+                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                    @endif
+                                                </svg>
+                                            </span>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div>
+                                                <div class="text-sm">
+                                                    <span class="font-medium text-gray-900">
+                                                        Permintaan Pupuk {{ $request->fertilizer->name }}
+                                                    </span>
+                                                </div>
+                                                <p class="mt-0.5 text-sm text-gray-500">
+                                                    {{ $request->quantity }} kg · {{ $request->created_at->diffForHumans() }}
+                                                </p>
+                                                <p class="mt-1 text-xs">
+                                                    <span class="{{ 
+                                                        $request->status === 'approved' ? 'text-green-700' : 
+                                                        ($request->status === 'pending' ? 'text-yellow-700' : 'text-red-700') 
+                                                    }}">
+                                                        {{ 
+                                                            $request->status === 'approved' ? 'Disetujui' : 
+                                                            ($request->status === 'pending' ? 'Menunggu Persetujuan' : 'Ditolak') 
+                                                        }}
+                                                    </span>
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            @endforeach --}}
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 @endsection

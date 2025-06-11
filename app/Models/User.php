@@ -63,4 +63,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Quota::class);
     }
+
+    public function approvedRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class, 'processed_by');
+    }
 }

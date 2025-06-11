@@ -4,31 +4,33 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class StockTransaction extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory;
 
     protected $fillable = [
         'fertilizer_id',
         'quantity',
-        'transaction_type', // 'in' atau 'out'
-        'notes',
-        'admin_id'
+        'type', // in, out
+        'description',
+        'performed_by',
     ];
 
-    protected $casts = [
-        'transaction_date' => 'datetime'
-    ];
-
+    // Relasi dengan Fertilizer
     public function fertilizer()
     {
         return $this->belongsTo(Fertilizer::class);
     }
 
-    public function admin()
+    // Relasi dengan User yang melakukan
+    public function performer()
     {
-        return $this->belongsTo(User::class, 'admin_id');
+        return $this->belongsTo(User::class, 'performed_by');
+    }
+
+    protected function setDescriptionAttribute($value)
+    {
+        $this->attributes['description'] = $value ?? 'Transaksi stok pupuk';
     }
 }

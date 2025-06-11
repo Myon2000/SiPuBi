@@ -11,7 +11,9 @@ class QuotaController extends Controller
 {
     public function index()
     {
-        $farmers = User::where('role', 'petani')->get();
+        $farmers = User::where('role', 'petani')
+                ->withCount('quotas')
+                ->get();
         return view('admin.quotas.index', compact('farmers'));
     }
     

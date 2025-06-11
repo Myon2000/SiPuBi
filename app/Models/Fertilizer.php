@@ -47,6 +47,11 @@ class Fertilizer extends Model
         return $this->hasMany(Transaction::class);
     }
 
+    public function purchaseRequests()
+    {
+        return $this->hasMany(PurchaseRequest::class);
+    }
+
     public function quotas()
     {
         return $this->hasMany(Quota::class);

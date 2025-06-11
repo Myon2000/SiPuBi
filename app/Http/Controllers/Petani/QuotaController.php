@@ -13,24 +13,31 @@ class QuotaController extends Controller
     {
         $user = auth()->user();
         
-        // Buat array untuk menyimpan kuota
+        // Selalu ambil data fertilizers
+        $fertilizers = Fertilizer::where('status', true)->get();
         $quotas = [];
         
-        // Dapatkan semua jenis pupuk aktif
-        $fertilizers = Fertilizer::where('status', true)->get();
-        
-        foreach ($fertilizers as $fertilizer) {
-            // Cari kuota yang sudah ada atau buat baru
-            $quota = Quota::firstOrCreate([
-                'user_id' => $user->id,
-                'fertilizer_id' => $fertilizer->id,
-            ], [
-                'used_amount' => 0,
-            ]);
-            
-            $quotas[] = $quota;
+        // Jika pengguna memiliki lahan, buat quotas
+        if ($user->land_area && $user->land_area > 0) {
+            foreach ($fertilizers as $fertilizer) {
+                // Pastikan kuota ada untuk setiap pupuk
+                $quota = Quota::firstOrCreate(
+                    [
+                        'user_id' => $user->id,
+                        'fertilizer_id' => $fertilizer->id,
+                    ],
+                    [
+                        'used_amount' => 0,
+                    ]
+                );
+                
+                // Muat relasi fertilizer secara manual
+                $quota->setRelation('fertilizer', $fertilizer);
+                
+                $quotas[] = $quota;
+            }
         }
         
-        return view('petani.quotas.index', compact('quotas'));
+        return view('petani.quotas.index', compact('quotas', 'fertilizers'));
     }
 }

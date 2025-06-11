@@ -13,6 +13,10 @@
                    class="hover:bg-blue-700 px-3 py-2 rounded {{ request()->routeIs('admin.fertilizers.*') ? 'bg-blue-700' : '' }}">
                     Pupuk
                 </a>
+                <a href="{{ route('admin.purchase-requests.index') }}" 
+                   class="hover:bg-blue-700 px-3 py-2 rounded {{ request()->routeIs('admin.purchase-requests.*') ? 'bg-blue-700' : '' }}">
+                    Permintaan
+                </a>
                 <a href="{{ route('admin.quotas.index') }}" 
                    class="hover:bg-blue-700 px-3 py-2 rounded {{ request()->routeIs('admin.quotas.*') ? 'bg-blue-700' : '' }}">
                     Kuota
