@@ -18,16 +18,20 @@ class PurchaseRequestController extends Controller
      */
     public function index(Request $request)
     {
-        $status = $request->query('status', 'pending');
+        $status = $request->status ?? 'pending';
+        $query = PurchaseRequest::with(['farmer', 'fertilizer']);
         
-        $requests = PurchaseRequest::with(['farmer', 'fertilizer'])
-            ->when($status !== 'all', function ($query) use ($status) {
-                return $query->where('status', $status);
-            })
-            ->latest()
-            ->paginate(10)
-            ->appends(['status' => $status]);
-            
+        if ($status !== 'all') {
+            $query->where('status', $status);
+        }
+        
+        $requests = $query->latest()->paginate(10);
+        
+        if ($request->ajax()) {
+            $view = view('admin.purchase_requests._requests_table', compact('requests'))->render();
+            return response()->json(['html' => $view]);
+        }
+        
         return view('admin.purchase_requests.index', compact('requests', 'status'));
     }
 

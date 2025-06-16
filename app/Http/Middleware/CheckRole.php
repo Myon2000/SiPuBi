@@ -23,8 +23,7 @@ class CheckRole
             
             // If admin trying to access petani routes
             if ($request->user()->role === 'admin') {
-                return redirect()->route('admin.dashboard')
-                    ->with('error', 'Unauthorized access');
+                return redirect()->route('admin.dashboard');
             }
             
             // If petani trying to access admin routes

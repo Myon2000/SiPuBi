@@ -138,7 +138,7 @@
                     
                     <form action="{{ route('admin.purchase-requests.approve', $purchaseRequest) }}" method="POST">
                         @csrf
-                        <button type="submit" 
+                        <button type="submit" id="approve-button"
                                 class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
                                 onclick="return confirm('Apakah Anda yakin ingin menyetujui permintaan ini?')">
                             Setujui Permintaan
@@ -220,4 +220,32 @@
         @endif
     </div>
 </div>
+@endsection
+
+@section('script')
+<script>
+$('#approve-button').click(function(e) {
+    e.preventDefault();
+    
+    $.ajax({
+        url: "{{ route('admin.purchase-requests.approve', $purchaseRequest) }}",
+        type: 'POST',
+        data: {
+            _token: "{{ csrf_token() }}"
+        },
+        success: function(response) {
+            // Update UI tanpa refresh halaman
+            $('#status-badge').removeClass('bg-yellow-100 text-yellow-800')
+                .addClass('bg-green-100 text-green-800')
+                .text('Disetujui');
+            
+            // Tampilkan notifikasi sukses
+            toastr.success('Permintaan berhasil disetujui');
+            
+            // Update tombol-tombol aksi
+            $('#action-buttons').hide();
+        }
+    });
+});
+</script>
 @endsection

@@ -1,4 +1,5 @@
 <?php
+// filepath: d:\Kuliah\SEMESTER 4\PWEB\Project\SiPuBi\routes\web.php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\FertilizerController as AdminFertilizerController;
@@ -11,6 +12,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Admin\PurchaseRequestController as AdminPurchaseRequestController;
 use App\Http\Controllers\Petani\PurchaseRequestController as PetaniPurchaseRequestController;
+use App\Http\Controllers\VerificationController;
+use App\Http\Controllers\Admin\VerificationController as AdminVerificationController;
 
 // Landing page with role-based redirect
 Route::get('/', function () {
@@ -45,13 +48,22 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'role:admin'])->grou
     Route::post('purchase-requests/{purchaseRequest}/reject', [AdminPurchaseRequestController::class, 'reject'])->name('purchase-requests.reject');
 
     Route::post('purchase-requests/{purchaseRequest}', [AdminPurchaseRequestController::class, 'update'])->name('purchase-requests.update');
+    
+    // Verifikasi routes for admin
+    Route::get('verifications', [AdminVerificationController::class, 'index'])->name('verifications.index');
+
+    Route::get('verifications/{verification}', [AdminVerificationController::class, 'show'])->name('verifications.show');
+
+    Route::post('verifications/{verification}/approve', [AdminVerificationController::class, 'approve'])->name('verifications.approve');
+
+    Route::post('verifications/{verification}/reject', [AdminVerificationController::class, 'reject'])->name('verifications.reject');
+    
+    Route::get('verifications/{verification}/download-ktp', [AdminVerificationController::class, 'downloadKtp'])->name('verifications.download-ktp');
 });
 
 // Petani Routes
 Route::middleware(['auth', 'role:petani'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('petani.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [PetaniDashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/quotas', [PetaniQuotaController::class, 'index'])->name('quotas.index');
     
@@ -63,15 +75,12 @@ Route::middleware(['auth', 'role:petani'])->group(function () {
 
     Route::post('purchase-requests/{purchaseRequest}/cancel', [PetaniPurchaseRequestController::class, 'cancel'])
         ->name('petani.purchase-requests.cancel');
+
+    // Verifikasi lahan route
+    Route::post('/profile/verify-land', [VerificationController::class, 'store'])->name('profile.verify-land');
 });
 
-// Profile routes
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
+// Profile routes - menghindari duplikasi
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

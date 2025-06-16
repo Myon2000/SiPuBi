@@ -125,3 +125,44 @@
     </div>
 </div>
 @endsection
+@section('scripts')
+<script>
+$(document).ready(function() {
+    // Tambahkan class "status-filter" ke tombol filter
+    $('.px-4.py-2.rounded-md').addClass('status-filter');
+    
+    $('.status-filter').click(function(e) {
+        e.preventDefault();
+        
+        const url = $(this).attr('href');
+        const status = url.split('status=')[1];
+        
+        // Tampilkan loading
+        const tableBody = $('table tbody');
+        tableBody.html('<tr><td colspan="8" class="text-center py-4"><div class="spinner-border text-blue-500" role="status"><span class="sr-only">Loading...</span></div></td></tr>');
+        
+        $.ajax({
+            url: url,
+            type: 'GET',
+            dataType: 'json',
+            success: function(response) {
+                if (response.html) {
+                    tableBody.html(response.html);
+                    
+                    // Update URL
+                    window.history.pushState({}, "", url);
+                    
+                    // Update active filter
+                    $('.status-filter').removeClass('bg-blue-600 text-white').addClass('bg-gray-200 text-gray-700');
+                    $(e.target).removeClass('bg-gray-200 text-gray-700').addClass('bg-blue-600 text-white');
+                }
+            },
+            error: function(xhr, status, error) {
+                tableBody.html('<tr><td colspan="8" class="text-center py-4 text-red-500">Terjadi kesalahan saat memuat data</td></tr>');
+                console.error('AJAX Error:', error);
+            }
+        });
+    });
+});
+</script>
+@endsection

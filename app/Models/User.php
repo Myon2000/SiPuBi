@@ -1,8 +1,8 @@
 <?php
+// filepath: d:\Kuliah\SEMESTER 4\PWEB\Project\SiPuBi\app\Models\User.php
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -12,11 +12,6 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     protected $fillable = [
         'name',
         'email',
@@ -25,28 +20,25 @@ class User extends Authenticatable
         'address',
         'phone',
         'status',
-        'land_area', 
+        'land_area',
+        'ktp_image',
+        'land_area_verified',
+        'latitude',
+        'longitude',
+        'verification_requested_at',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
     protected $hidden = [
         'password',
         'remember_token',
     ];
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
         'status' => 'boolean',
+        'land_area_verified' => 'boolean',
+        'verification_requested_at' => 'datetime',
     ];
 
     protected $attributes = [
@@ -67,5 +59,27 @@ class User extends Authenticatable
     public function approvedRequests()
     {
         return $this->hasMany(PurchaseRequest::class, 'processed_by');
+    }
+
+    public function verificationRequests()
+    {
+        return $this->hasMany(VerificationRequest::class);
+    }
+
+    public function hasPendingVerification()
+    {
+        return $this->verificationRequests()
+            ->where('status', 'pending')
+            ->exists();
+    }
+
+    public function getFormattedAddressAttribute()
+    {
+        return $this->address ?: 'Alamat belum diisi';
+    }
+
+    public function getFormattedLandAreaAttribute()
+    {
+        return $this->land_area ? number_format($this->land_area, 2) . ' hektar' : '-';
     }
 }

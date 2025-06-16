@@ -17,6 +17,10 @@
                    class="hover:bg-blue-700 px-3 py-2 rounded {{ request()->routeIs('admin.purchase-requests.*') ? 'bg-blue-700' : '' }}">
                     Permintaan
                 </a>
+                <a href="{{ route('admin.verifications.index') }}" 
+                class="hover:bg-blue-700 px-3 py-2 rounded {{ request()->routeIs('admin.verifications.*') ? 'bg-blue-700' : '' }}">
+                    Verifikasi Lahan
+                </a>
                 <a href="{{ route('admin.quotas.index') }}" 
                    class="hover:bg-blue-700 px-3 py-2 rounded {{ request()->routeIs('admin.quotas.*') ? 'bg-blue-700' : '' }}">
                     Kuota
